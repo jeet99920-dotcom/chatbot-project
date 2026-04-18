@@ -1,6 +1,6 @@
 import streamlit as st
 from groq import Groq
-
+st.write("Key loaded:", st.secrets["GROQ_API_KEY"][:10])
 st.set_page_config(page_title="AI Chatbot", layout="wide")
 st.title("🤖 Real AI Chatbot (Groq)")
 
