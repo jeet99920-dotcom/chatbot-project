@@ -5,8 +5,11 @@ st.set_page_config(page_title="AI Chatbot", layout="wide")
 
 st.title("🤖 AI Chatbot")
 
-# Initialize client (free)
-client = InferenceClient()
+# HuggingFace client
+client = InferenceClient(
+    model="mistralai/Mistral-Nemo-Instruct-2407",
+    token="YOUR_HF_TOKEN"   # replace this with your HuggingFace token
+)
 
 # Initialize chat history
 if "messages" not in st.session_state:
@@ -19,32 +22,41 @@ for msg in st.session_state.messages:
     else:
         st.markdown(f"**🤖 Bot:** {msg['content']}")
 
-# Input
+# Input box
 user_input = st.chat_input("Type your message...")
 
 if user_input:
     # Save user message
-    st.session_state.messages.append({"role": "user", "content": user_input})
+    st.session_state.messages.append({
+        "role": "user",
+        "content": user_input
+    })
 
     st.markdown(f"**🧑 You:** {user_input}")
 
-    # Build conversation context
-    context = "You are a helpful assistant.\n"
-    for msg in st.session_state.messages:
-        context += f"{msg['role']}: {msg['content']}\n"
-
-    # Get AI response
+    # Call HuggingFace Chat API
     with st.spinner("Thinking... 🤔"):
         try:
-            response = client.text_generation(
-                context,
-                max_new_tokens=150
+            response = client.chat_completion(
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are a helpful assistant."
+                    },
+                    *st.session_state.messages
+                ],
+                max_tokens=150
             )
-            bot_reply = response
+
+            bot_reply = response.choices[0].message["content"]
+
         except Exception as e:
             bot_reply = f"Error: {str(e)}"
 
-    # Save bot reply
-    st.session_state.messages.append({"role": "assistant", "content": bot_reply})
+    # Save bot response
+    st.session_state.messages.append({
+        "role": "assistant",
+        "content": bot_reply
+    })
 
     st.markdown(f"**🤖 Bot:** {bot_reply}")
