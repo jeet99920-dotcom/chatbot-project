@@ -4,24 +4,32 @@ st.set_page_config(page_title="Chatbot", layout="wide")
 
 st.title("🤖 My Chatbot")
 
-# Initialize chat history
+# Initialize session state
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Show chat history
+# Display chat history
 for msg in st.session_state.messages:
-    st.write(f"{msg['role']}: {msg['content']}")
+    if msg["role"] == "user":
+        st.markdown(f"**🧑 You:** {msg['content']}")
+    else:
+        st.markdown(f"**🤖 Bot:** {msg['content']}")
 
-# User input
-user_input = st.text_input("Type your message")
+# Chat input (better than text_input)
+user_input = st.chat_input("Type your message...")
 
 if user_input:
-    # Save user message
-    st.session_state.messages.append({"role": "User", "content": user_input})
+    # Add user message
+    st.session_state.messages.append({"role": "user", "content": user_input})
 
-    # Simple bot reply
-    bot_reply = "This is a test reply"
+    # Display user message immediately
+    st.markdown(f"**🧑 You:** {user_input}")
 
-    st.session_state.messages.append({"role": "Bot", "content": bot_reply})
+    # Generate bot reply
+    bot_reply = f"You said: {user_input}"
 
-    st.rerun()
+    # Add bot message
+    st.session_state.messages.append({"role": "assistant", "content": bot_reply})
+
+    # Display bot reply
+    st.markdown(f"**🤖 Bot:** {bot_reply}")
