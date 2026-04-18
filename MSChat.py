@@ -1,10 +1,14 @@
 import streamlit as st
+from huggingface_hub import InferenceClient
 
-st.set_page_config(page_title="Chatbot", layout="wide")
+st.set_page_config(page_title="AI Chatbot", layout="wide")
 
-st.title("🤖 My Chatbot")
+st.title("🤖 AI Chatbot")
 
-# Initialize session state
+# Initialize client (free)
+client = InferenceClient()
+
+# Initialize chat history
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
@@ -15,21 +19,32 @@ for msg in st.session_state.messages:
     else:
         st.markdown(f"**🤖 Bot:** {msg['content']}")
 
-# Chat input (better than text_input)
+# Input
 user_input = st.chat_input("Type your message...")
 
 if user_input:
-    # Add user message
+    # Save user message
     st.session_state.messages.append({"role": "user", "content": user_input})
 
-    # Display user message immediately
     st.markdown(f"**🧑 You:** {user_input}")
 
-    # Generate bot reply
-    bot_reply = f"You said: {user_input}"
+    # Build conversation context
+    context = "You are a helpful assistant.\n"
+    for msg in st.session_state.messages:
+        context += f"{msg['role']}: {msg['content']}\n"
 
-    # Add bot message
+    # Get AI response
+    with st.spinner("Thinking... 🤔"):
+        try:
+            response = client.text_generation(
+                context,
+                max_new_tokens=150
+            )
+            bot_reply = response
+        except Exception as e:
+            bot_reply = f"Error: {str(e)}"
+
+    # Save bot reply
     st.session_state.messages.append({"role": "assistant", "content": bot_reply})
 
-    # Display bot reply
     st.markdown(f"**🤖 Bot:** {bot_reply}")
