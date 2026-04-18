@@ -55,4 +55,4 @@ if user_input:
         "content": bot_reply
     })
 
-    st.markdown(f"**🤖 Bot:** {bot_reply}")
+    st.markdown(f"**🤖 MS:** {bot_reply}")
