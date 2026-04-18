@@ -1,62 +1,51 @@
 import streamlit as st
-from huggingface_hub import InferenceClient
 
 st.set_page_config(page_title="AI Chatbot", layout="wide")
+st.title("🤖 Simple Working Chatbot")
 
-st.title("🤖 AI Chatbot")
-
-# HuggingFace client
-client = InferenceClient(
-    model="mistralai/Mistral-Nemo-Instruct-2407",
-    token="YOUR_HF_TOKEN"   # replace this with your HuggingFace token
-)
-
-# Initialize chat history
+# Chat history
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Display chat history
+# Show chat history
 for msg in st.session_state.messages:
     if msg["role"] == "user":
         st.markdown(f"**🧑 You:** {msg['content']}")
     else:
         st.markdown(f"**🤖 Bot:** {msg['content']}")
 
-# Input box
+# Input
 user_input = st.chat_input("Type your message...")
+
+# Simple response engine
+def get_response(text):
+    text = text.lower()
+
+    if "hello" in text or "hi" in text:
+        return "Hello! 👋 How can I help you today?"
+
+    elif "name" in text:
+        return "I am your simple AI chatbot 🤖"
+
+    elif "time" in text:
+        return "I cannot fetch real-time data yet ⏰"
+
+    elif "python" in text:
+        return "Python is a programming language used for AI, web, automation 🚀"
+
+    elif "help" in text:
+        return "I can answer basic questions. Try asking something simple 🙂"
+
+    else:
+        return "I'm still learning 🤖 — but I understood your message!"
 
 if user_input:
     # Save user message
-    st.session_state.messages.append({
-        "role": "user",
-        "content": user_input
-    })
-
+    st.session_state.messages.append({"role": "user", "content": user_input})
     st.markdown(f"**🧑 You:** {user_input}")
 
-    # Call HuggingFace Chat API
-    with st.spinner("Thinking... 🤔"):
-        try:
-            response = client.chat_completion(
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "You are a helpful assistant."
-                    },
-                    *st.session_state.messages
-                ],
-                max_tokens=150
-            )
+    # Bot response
+    bot_reply = get_response(user_input)
 
-            bot_reply = response.choices[0].message["content"]
-
-        except Exception as e:
-            bot_reply = f"Error: {str(e)}"
-
-    # Save bot response
-    st.session_state.messages.append({
-        "role": "assistant",
-        "content": bot_reply
-    })
-
+    st.session_state.messages.append({"role": "assistant", "content": bot_reply})
     st.markdown(f"**🤖 Bot:** {bot_reply}")
