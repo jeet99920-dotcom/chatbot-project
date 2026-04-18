@@ -4,7 +4,7 @@ from groq import Groq
 st.set_page_config(page_title="AI Chatbot", layout="wide")
 st.title("🤖 Real AI Chatbot (Groq)")
 
-# ✅ Correct way: use secrets.toml
+# ✅ Load API key from secrets
 client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 
 # Chat history
@@ -21,10 +21,11 @@ for msg in st.session_state.messages:
         else:
             st.markdown(f"**🤖 Bot:** {msg['content']}")
 
-# Input
+# Input box
 user_input = st.chat_input("Type your message...")
 
 if user_input:
+    # Save user message
     st.session_state.messages.append({
         "role": "user",
         "content": user_input
@@ -35,7 +36,9 @@ if user_input:
     with st.spinner("Thinking... 🤔"):
         try:
             response = client.chat.completions.create(
-                model="llama3-8b-8192",
+                # ✅ FIXED MODEL (important)
+                model="llama-3.1-8b-instant",
+
                 messages=st.session_state.messages,
                 temperature=0.7,
                 max_tokens=200
@@ -46,6 +49,7 @@ if user_input:
         except Exception as e:
             bot_reply = f"Error: {str(e)}"
 
+    # Save bot response
     st.session_state.messages.append({
         "role": "assistant",
         "content": bot_reply
